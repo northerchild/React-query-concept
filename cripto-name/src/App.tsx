@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useReducer } from 'react'
 
 import './App.css'
 
@@ -11,15 +11,31 @@ const getRandomNumberFromApi = async():Promise<number> => {
 
 export const App = () => {
   const [number, setNUmber] = useState<number>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [key, forceRefetch] = useReducer(number => number+1 ,0)
 
   useEffect(() => {
-    getRandomNumberFromApi().then(num => setNUmber(num))
-  }, [])
+    setIsLoading(true)
+    getRandomNumberFromApi().then(setNUmber)
+  }, [key])
+
+  useEffect(() => {
+    if(number) setIsLoading(false)
+  }, [number])
+  
   
 
   return (
     <div>
-        <h2>Número Aleatorio: {number} </h2>
+        { isLoading ?
+          (<h2>Cargando...</h2>)
+          : (<h2>Número Aleatorio: {number} </h2>)
+        }
+        
+        <button onClick={forceRefetch} disabled={isLoading}>
+          { isLoading ? '...' : 'Nuevo número'}
+        </button>
+
     </div>
   )
 }
